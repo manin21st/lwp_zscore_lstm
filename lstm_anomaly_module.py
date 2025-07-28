@@ -11,7 +11,8 @@ from tensorflow.keras.layers import LSTM, Dense
 import os
 
 # 오라클 클라이언트 64bit 적용
-os.environ["PATH"] = r"C:\instantclient_18_5;" + os.environ["PATH"]
+# os.environ["PATH"] = r"C:\instantclient_18_5;" + os.environ["PATH"]
+os.environ["PATH"] = os.getenv("ORACLE_CLIENT_PATH") + ";" + os.environ["PATH"]
 
 # ====================
 # 1. Oracle DB 연동
