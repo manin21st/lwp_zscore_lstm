@@ -21,7 +21,7 @@ df = load_data_from_oracle(user, password, host, service_name, query)
 df = detect_outliers_zscore(df)
 
 # 3. 모델 학습 및 scaler 저장
-scaler = train_and_save_lstm_model(df, window_size=60, model_path='lstm_model.h5')
+scaler = train_and_save_lstm_model(df, window_size=60, model_path='lstm_model.keras')
 
 # 4. Scaler 객체 저장
 with open('scaler.pkl', 'wb') as f:

@@ -1,6 +1,6 @@
 
 # predict.py
-from lstm_anomaly_module import load_data_from_oracle, detect_outliers_zscore, load_model_and_predict
+from lstm_anomaly_module import load_data_from_oracle, detect_outliers_zscore, load_model_and_predict, save_results_to_oracle
 import pickle
 
 # Oracle 접속 정보
@@ -25,7 +25,7 @@ with open('scaler.pkl', 'rb') as f:
     scaler = pickle.load(f)
 
 # 4. 모델 로딩 및 예측
-df_result = load_model_and_predict(df, scaler, window_size=60, model_path='lstm_model.h5', threshold=0.05)
+df_result = load_model_and_predict(df, scaler, window_size=60, model_path='lstm_model.keras', threshold=0.05)
 
 # 5. 이상치 출력
 print(df_result[df_result['lstm_anomaly'] | df_result['z_outlier']][['센서값', 'zscore', 'z_outlier', 'pred', 'error', 'lstm_anomaly']])
