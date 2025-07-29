@@ -3,9 +3,15 @@ import numpy as np
 import cx_Oracle
 from scipy.stats import circmean, circstd
 import os
+from config_manager import load_encrypted_config
 
 # 오라클 클라이언트 경로 설정 (Windows 환경 기준)
-os.environ["PATH"] = r"C:\instantclient_18_5;" + os.environ["PATH"]
+# os.environ["PATH"] = r"C:\instantclient_18_5;" + os.environ["PATH"]
+client_path = os.getenv("ORACLE_CLIENT_PATH")
+if client_path:
+    os.environ["PATH"] = client_path + ";" + os.environ["PATH"]
+
+config = load_encrypted_config()
 
 def angular_difference(a, b):
     return (a - b + 180) % 360 - 180
@@ -50,7 +56,12 @@ def detect_zscores_for_all_cams(df, window_size=30):
 
     return df
 
-def load_zscore_data(user, password, host, service_name):
+def load_zscore_data():
+    user = config['database']['user']
+    password = config['database']['password']
+    host = config['database']['host']
+    service_name = config['database']['service_name']
+
     query = """
         SELECT RDATE, CAM1, CAM2, CAM3, CAM4, CAM5, CAM6
         FROM ZSCORE2
@@ -67,8 +78,12 @@ def load_zscore_data(user, password, host, service_name):
     # index 지정 제거
     # df.set_index('RDATE', inplace=True)
     return df
-
 def update_zscore_to_oracle(df, user, password, host, service_name):
+    user = config['database']['user']
+    password = config['database']['password']
+    host = config['database']['host']
+    service_name = config['database']['service_name']
+
     dsn = cx_Oracle.makedsn(host, 1521, service_name=service_name)
     conn = cx_Oracle.connect(user=user, password=password, dsn=dsn)
     cursor = conn.cursor()
@@ -90,9 +105,14 @@ def update_zscore_to_oracle(df, user, password, host, service_name):
     cursor.close()
     conn.close()
 
-def update_zscore_direct(df, user, password, host, service_name, chunk_size=5000):
+def update_zscore_direct(df, chunk_size=5000):
     from datetime import datetime
     import time
+
+    user = config['database']['user']
+    password = config['database']['password']
+    host = config['database']['host']
+    service_name = config['database']['service_name']
 
     dsn = cx_Oracle.makedsn(host, 1521, service_name=service_name)
     conn = cx_Oracle.connect(user=user, password=password, dsn=dsn)

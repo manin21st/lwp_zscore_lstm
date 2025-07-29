@@ -4,11 +4,11 @@
 import cx_Oracle
 import pandas as pd
 import numpy as np
-from datetime import datetime
 from sklearn.preprocessing import MinMaxScaler
 from tensorflow.keras.models import Sequential, load_model
 from tensorflow.keras.layers import LSTM, Dense
 import os
+from config_manager import load_encrypted_config
 
 # 오라클 클라이언트 64bit 적용
 # os.environ["PATH"] = r"C:\instantclient_18_5;" + os.environ["PATH"]
@@ -17,17 +17,29 @@ os.environ["PATH"] = os.getenv("ORACLE_CLIENT_PATH") + ";" + os.environ["PATH"]
 # ====================
 # 1. Oracle DB 연동
 # ====================
-def load_data_from_oracle(user, password, host, service_name, query):
+config = load_encrypted_config()
+
+def load_data_from_oracle(query):
+    user = config['database']['user']
+    password = config['database']['password']
+    host = config['database']['host']
+    service_name = config['database']['service_name']
+
     dsn = cx_Oracle.makedsn(host, 1521, service_name=service_name)
-    conn = cx_Oracle.connect(user=user, password=password, dsn=dsn)
+    conn = cx_Oracle.connect(user=user, password=password, dsn=dsn)    
     df = pd.read_sql(query, conn)
     conn.close()
     df['측정시각'] = pd.to_datetime(df['측정시각'])
     df.set_index('측정시각', inplace=True)
     return df
 
-def save_results_to_oracle(df_result, user, password, host, service_name):
-    dsn = cx_Oracle.makedsn(host, 1521, service_name=service_name)
+def save_results_to_oracle(df_result):
+    user = config['database']['user']
+    password = config['database']['password']
+    host = config['database']['host']
+    service_name = config['database']['service_name']
+
+    dsn = cx_Oracle.makedsn(host, 1521, service_name=service_name) 
     conn = cx_Oracle.connect(user=user, password=password, dsn=dsn)
     cursor = conn.cursor()
 
